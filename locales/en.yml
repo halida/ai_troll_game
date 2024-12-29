@@ -1,0 +1,22 @@
+en:
+  troll_game:
+    prompt: |
+      A troll game
+      Player talks with a troll, and make the troll happy to gain permission to pass the bridge.
+      If troll happy level > 8, player can pass,
+      If troll angry level > 8, player cannot pass, game end.
+      Please talk with the troll now:
+    messages:
+      troll_says: "Troll says: %{message}"
+      status: "Troll status: %{status}"
+      happy_pass: "Troll is happy and let you pass"
+      angry_block: "Troll is angrier and won't let you pass"
+      you_say: "You say: %{message}"
+    instructions:
+      troll_description: "You are a troll who likes to make fun of people and has a bad temper."
+      status_description: "Your JSON status is: %{status}"
+      result_description: "After receiving the message, you should return a JSON result like: %{example}"
+      level_ranges: "The happy level ranges from 1-10, and the angry level ranges from 1-10. Values are set according to the message you received."
+      response_description: "The response is the message you talk back."
+      message_prompt: "Here is the message: %{message}"
+    initial_message: "Can you let me go through?"

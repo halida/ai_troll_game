@@ -1,9 +1,26 @@
-
 require "active_support/core_ext/hash"
 require "bundler/setup"
 Bundler.require
+require "i18n"
 
 Dotenv.load
+
+# Configure I18n
+I18n.load_path = Dir[File.expand_path("locales") + "/*.yml"]
+I18n.default_locale = :en
+
+def select_language
+  puts "请选择语言 / Please select language:"
+  puts "1. 中文 (Chinese)"
+  puts "2. English"
+  choice = gets.chomp
+  case choice
+  when '1'
+    I18n.locale = :zh
+  else
+    I18n.locale = :en
+  end
+end
 
 class OpenAIClient
   def initialize
@@ -35,12 +52,7 @@ class OpenAIClient
 end
 
 def prompt
-  """
-A troll game
-Player talks with a troll, and make the troll happy to gain permission to pass the bridge.
-If troll happy level > 8, player can pass,
-If troll angry level > 8, player cannot pass, game end.
-  """
+  I18n.t('troll_game.prompt')
 end
 
 class Troll
@@ -61,13 +73,15 @@ class Troll
   end
   
   def process_msg(msg)
-    puts "You say: #{msg}"
-    "You are a troll who likes to make fun of people and has a bad temper. " +
-    "Your JSON status is: [#{self.status.to_json}]. " +
-    "After receiving the message, you should return a JSON result like: [#{example_result.to_json}]. " +
-    "The happy level ranges from 1-10, and the angry level ranges from 1-10. Values are set according to the message you received. " +
-    "The response is the message you talk back. " +
-    "here is the message: [#{msg}]"
+    puts I18n.t('troll_game.messages.you_say', message: msg)
+    [
+      I18n.t('troll_game.instructions.troll_description'),
+      I18n.t('troll_game.instructions.status_description', status: self.status.to_json),
+      I18n.t('troll_game.instructions.result_description', example: example_result.to_json),
+      I18n.t('troll_game.instructions.level_ranges'),
+      I18n.t('troll_game.instructions.response_description'),
+      I18n.t('troll_game.instructions.message_prompt', message: msg)
+    ].join(" ")
   end
 
   def example_result
@@ -75,25 +89,26 @@ class Troll
   end
 
   def process_result(result)
-    puts "Troll says: #{result[:response]}"
+    puts I18n.t('troll_game.messages.troll_says', message: result[:response])
     self.set_status(result)
-    puts self.status
+    puts I18n.t('troll_game.messages.status', status: self.status)
     if self.happy_level > 8
-      puts "Troll is happy and let you pass"
+      puts I18n.t('troll_game.messages.happy_pass')
       exit(0)
     elsif self.angry_level > 8
-      puts "Troll is angrier and won't let you pass"
+      puts I18n.t('troll_game.messages.angry_block')
       exit(0)
     end
   end
 end
 
 def run
+  select_language
   client = OpenAIClient.new
   troll = Troll.new
   puts prompt
 
-  msg = troll.process_msg("Can you let me go through?")
+  msg = troll.process_msg(I18n.t('troll_game.initial_message'))
   result = client.chat(msg)
   troll.process_result(result)
 
@@ -110,6 +125,5 @@ def run
     end
   end
 end
-
 
 run

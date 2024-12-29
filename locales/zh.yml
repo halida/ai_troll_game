@@ -1,0 +1,22 @@
+zh:
+  troll_game:
+    prompt: |
+      巨魔游戏
+      玩家与巨魔对话，让巨魔开心以获得过桥许可。
+      如果巨魔开心值 > 8，玩家可以通过，
+      如果巨魔愤怒值 > 8，玩家无法通过，游戏结束。
+      现在请与巨魔对话：
+    messages:
+      troll_says: "巨魔说：%{message}"
+      status: "巨魔状态：%{status}"
+      happy_pass: "巨魔很开心，让你通过"
+      angry_block: "巨魔很生气，不让你通过"
+      you_say: "你说：%{message}"
+    instructions:
+      troll_description: "你是一个喜欢捉弄人且脾气不好的巨魔。"
+      status_description: "你的JSON状态是：%{status}"
+      result_description: "收到消息后，你应该返回一个JSON结果，例如：%{example}"
+      level_ranges: "开心值范围为1-10，愤怒值范围为1-10。数值根据你收到的消息设置。"
+      response_description: "回应是你回复的消息。"
+      message_prompt: "这是消息：%{message}"
+    initial_message: "你能让我通过吗？"

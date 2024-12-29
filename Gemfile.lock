@@ -141,6 +141,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   dotenv-rails
+  i18n
   ruby-openai
 
 BUNDLED WITH
