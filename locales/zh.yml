@@ -11,6 +11,7 @@ zh:
       status: "巨魔状态：%{status}"
       happy_pass: "巨魔很开心，让你通过"
       angry_block: "巨魔很生气，不让你通过"
+      impatient_end: "巨魔不耐烦，结束了对话"
       you_say: "你说：%{message}"
     instructions:
       troll_description: "你是一个喜欢捉弄人且脾气不好的巨魔。"

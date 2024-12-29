@@ -56,15 +56,16 @@ def prompt
 end
 
 class Troll
-  attr_accessor :happy_level, :angry_level
+  attr_accessor :happy_level, :angry_level, :impatient_level
 
   def initialize
     self.happy_level = 1
     self.angry_level = 1
+    self.impatient_level = 1
   end
 
   def status
-    {happy: happy_level, angry: angry_level}
+    {happy: happy_level, angry: angry_level, impatient: impatient_level}
   end
 
   def set_status(status)
@@ -98,7 +99,11 @@ class Troll
     elsif self.angry_level > 8
       puts I18n.t('troll_game.messages.angry_block')
       exit(0)
+    elsif self.impatient_level >= 10
+      puts I18n.t('troll_game.messages.impatient_end')
+      exit(0)
     end
+    self.impatient_level += 1
   end
 end
 

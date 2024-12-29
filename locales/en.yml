@@ -11,6 +11,7 @@ en:
       status: "Troll status: %{status}"
       happy_pass: "Troll is happy and let you pass"
       angry_block: "Troll is angrier and won't let you pass"
+      impatient_end: "Troll is too impatient and ends the conversation"
       you_say: "You say: %{message}"
     instructions:
       troll_description: "You are a troll who likes to make fun of people and has a bad temper."
