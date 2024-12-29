@@ -1,6 +1,34 @@
 
-require "openai"
+require "bundler/setup"
+Bundler.require
 
+Dotenv.load
+
+class OpenAIClient
+  def initialize
+    @client = OpenAI::Client.new(
+      uri_base: ENV.fetch(:URI_BASE),
+      access_token: ENV.fetch(:ACCESS_TOKEN),
+      log_errors: true,
+    )
+  end
+
+  def chat(message)
+    response = @client.chat(
+      parameters: {
+        model: "deepseek-chat",
+        messages: [{ role: "user", content: message }],
+        temperature: 0.7,
+      }
+    )
+
+    if response["error"]
+      raise "API Error: #{response["error"]["message"]}"
+    end
+
+    JSON.parse(response.dig("choices", 0, "message", "content")).with_indifferent_access
+  end
+end
 
 def prompt
   """
@@ -12,7 +40,7 @@ Please talk with the troll now:
   """
 end
 
-class Troll < StatusUpdate
+class Troll
   attr_accessor :happy_level, :angry_level
 
   def initialize
@@ -57,13 +85,7 @@ class Troll < StatusUpdate
 end
 
 def run
-  client = OpenAI::Client.new(
-    uri_base: ENV.fetch(:URI_BASE),
-    access_token: ENV.fetch(:ACCESS_TOKEN),
-    log_errors: true,
-  )
-  # client.models.list
-
+  client = OpenAIClient.new
   troll = Troll.new
   puts prompt
 
@@ -72,16 +94,12 @@ def run
     msg = readline
     msg = troll.process_msg(msg)
 
-    response = client.chat(
-      parameters: {
-        model: "deepseek-chat", # Required.
-        messages: [{ role: "user", content: msg}], # Required.
-        temperature: 0.7,
-      }
-    )
-
-    result = response.dig("choices", 0, "message", "content")
-    result = result.with_indifferent_access
-    troll.process_result(result)
+    begin
+      result = client.chat(msg)
+      troll.process_result(result)
+    rescue => e
+      puts "An error occurred: #{e.message}"
+      next
+    end
   end
 end
