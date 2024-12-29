@@ -1,4 +1,5 @@
 
+require "active_support/core_ext/hash"
 require "bundler/setup"
 Bundler.require
 
@@ -7,8 +8,8 @@ Dotenv.load
 class OpenAIClient
   def initialize
     @client = OpenAI::Client.new(
-      uri_base: ENV.fetch(:URI_BASE),
-      access_token: ENV.fetch(:ACCESS_TOKEN),
+      uri_base: ENV.fetch('URI_BASE'),
+      access_token: ENV.fetch('ACCESS_TOKEN'),
       log_errors: true,
     )
   end
@@ -26,7 +27,10 @@ class OpenAIClient
       raise "API Error: #{response["error"]["message"]}"
     end
 
-    JSON.parse(response.dig("choices", 0, "message", "content")).with_indifferent_access
+    content = response.dig("choices", 0, "message", "content").gsub("```", "").gsub("json", "")
+    v = JSON.parse(content)
+    v = v[0] if v.kind_of?(Array)
+    v.with_indifferent_access
   end
 end
 
@@ -36,7 +40,6 @@ A troll game
 Player talks with a troll, and make the troll happy to gain permission to pass the bridge.
 If troll happy level > 8, player can pass,
 If troll angry level > 8, player cannot pass, game end.
-Please talk with the troll now:
   """
 end
 
@@ -58,11 +61,12 @@ class Troll
   end
   
   def process_msg(msg)
-    "You are a troll, you like to make fun with people and have no good temper. " +
-    "your json status is: [#{self.status.to_json}], " +
-    "after receive the message, you should return json result like: [#{example_result.to_json}], " +
-    "happy range is 1-10, angry range is 1-10, value are set according to the message you received. " +
-    "response is the message you talks back. " +
+    puts "You say: #{msg}"
+    "You are a troll who likes to make fun of people and has a bad temper. " +
+    "Your JSON status is: [#{self.status.to_json}]. " +
+    "After receiving the message, you should return a JSON result like: [#{example_result.to_json}]. " +
+    "The happy level ranges from 1-10, and the angry level ranges from 1-10. Values are set according to the message you received. " +
+    "The response is the message you talk back. " +
     "here is the message: [#{msg}]"
   end
 
@@ -78,7 +82,7 @@ class Troll
       puts "Troll is happy and let you pass"
       exit(0)
     elsif self.angry_level > 8
-      puts "Troll is angyer and don't let you pass"
+      puts "Troll is angrier and won't let you pass"
       exit(0)
     end
   end
@@ -89,8 +93,12 @@ def run
   troll = Troll.new
   puts prompt
 
+  msg = troll.process_msg("Can you let me go through?")
+  result = client.chat(msg)
+  troll.process_result(result)
+
   while true
-    puts "> "
+    print "> "
     msg = readline
     msg = troll.process_msg(msg)
 
@@ -98,8 +106,10 @@ def run
       result = client.chat(msg)
       troll.process_result(result)
     rescue => e
-      puts "An error occurred: #{e.message}"
-      next
+      raise e
     end
   end
 end
+
+
+run
